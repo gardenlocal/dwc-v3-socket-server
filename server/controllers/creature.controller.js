@@ -86,7 +86,10 @@ const getGardensBounds = async () => {
 };
 
 const generateCreatureMovement = async (type, ownerGarden, fromPosition, teleport) => {
-  console.log("generateCreatureMovement", ownerGarden);
+  if (!ownerGarden) {
+    return null;
+  }
+
   const ownerGardenX = ownerGarden.x * 1000;
   const ownerGardenY = ownerGarden.y * 1000;
   const ownerGardenWidth = constants.GARDEN_WIDTH;
@@ -191,7 +194,7 @@ exports.updateCreatures = async (onlineUserUids, gardensForUid) => {
 
   const onlineCreatures = await exports.getAllCreaturesInfo();
   allCreatures = onlineCreatures.reduce((acc, el) => {
-    if (onlineUserUids.indexOf(el.user.uid) != -1) acc[el.id] = el;
+    if (el.user && onlineUserUids.indexOf(el.user.uid) != -1) acc[el.id] = el;
     return acc;
   }, {});
 
