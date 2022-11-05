@@ -91,13 +91,7 @@ onGardenTap = (socket) => async (data) => {
   console.log(data);
   const uid = socketIdToUserId[socket.id];
   const user = await getUserInfo(uid);
-  console.log(uid, user);
   let updates = await creatureController.updateSingleCreatureForTap(user, data);
-  console.log("=== updates ===");
-  console.log(updates);
-  Object.values(updates).forEach((u) => {
-    console.log(u.teleport);
-  });
   io.emit("creaturesUpdate", updates);
 };
 
