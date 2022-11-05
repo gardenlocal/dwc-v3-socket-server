@@ -1,32 +1,66 @@
-const database = require("./db");
-const gardenController = require("./controllers/garden.controller");
-const creatureController = require("./controllers/creature.controller");
-const Role = require("./models/Role");
-const User = require("./models/User");
-const TYPES = require("./datatypes");
-const bcrypt = require("bcryptjs");
-const constants = require("./constants");
-const { uid } = require("uid");
+const gardensService = require("./service/gardens.service");
 
-module.exports = async () => {
-  // Initialize with admin user if it doesn't exist already
-  return;
-  const adminUser = await database.findOne({ usertype: "admin" });
-  if (!adminUser) {
-    let user = await database.insert(new User({ uid: uid(), usertype: "admin" }));
+const { randomElementFromArray, randomIntInRange } = require("./utils");
+const { DWC_META } = require("../shared-constants");
+const { getConfig } = require("./config.js");
 
-    const garden = await gardenController.createGardenSection();
-    if (garden) {
-      user.gardenSection = garden._id;
+const generateProps = () => {
+  const noTiles = 4;
+  const stepsPerTile = 5;
+
+  const tileProps = [];
+  for (let i = 0; i < noTiles; i++) {
+    const currTile = [];
+    for (let j = 0; j < stepsPerTile; j++) {
+      const shapeTypes = getConfig().backgroundTypes;
+      const shape = randomElementFromArray(shapeTypes);
+      const target =
+        shape == DWC_META.tileShapes.TRIANGLE
+          ? randomElementFromArray([0.25, 0.4, 0.5, 0.6, 0.75])
+          : randomElementFromArray([0.25, 0.3, 0.4, 0.75]);
+      currTile.push({
+        target: target,
+        duration: randomIntInRange(25000, 75000),
+        shape: shape,
+        anchor: randomElementFromArray([0, 1, 2, 3]),
+      });
     }
 
-    const creature = await creatureController.createCreature(garden, user);
-    user.creature = creature._id;
+    tileProps.push(currTile);
+  }
 
-    await database.update({ _id: user._id }, user);
+  const shaderProps = {
+    shaderTimeSeed: Math.random() * 10,
+    shaderSpeed: Math.random() * 10 + 1,
+  };
 
-    console.log("Created admin user");
-  } else {
-    console.log("Admin user already exists, skipping creation...");
+  return {
+    tileProps,
+    shaderProps,
+  };
+};
+
+const xFrom = -10;
+const yFrom = -10;
+const xTo = 10;
+const yTo = 10;
+
+const init = async () => {
+  const gardens = [];
+  for (let x = xFrom; x <= xTo; x++) {
+    for (let y = yFrom; y <= yTo; y++) {
+      const { tileProps, shaderProps } = generateProps();
+      const garden = { x, y, index: Math.abs(x) + Math.abs(y), tileProps, shaderProps };
+      console.log(x, y);
+      gardens.push(garden);
+    }
+  }
+
+  try {
+    await Promise.all(gardens.map((g) => gardensService.save(g)));
+  } catch (e) {
+    console.error(e);
   }
 };
+
+init();
