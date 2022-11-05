@@ -54,8 +54,6 @@ exports.userConnected = async (socket) => {
     await creatureController.moveCreatureToGarden(creature, garden);
   } else {
     creature = await creatureController.createCreature(garden, user);
-    console.log(user);
-    console.log(creature);
     await usersService.update(user.id, { ...user, creature_id: creature.id });
   }
 

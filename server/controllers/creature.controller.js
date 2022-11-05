@@ -51,7 +51,6 @@ exports.bringCreatureOffline = async (user) => {
 };
 
 exports.moveCreatureToGarden = async (creature, garden) => {
-  console.log(garden);
   creature.animatedProperties = {
     position: await generateCreatureMovement(creature.appearance.creatureType, garden),
   };
@@ -71,14 +70,16 @@ exports.getAllCreaturesInfo = () => {
 // NOTE: deprecated on v3
 const getGardensBounds = async () => {
   const bbox = { x1: 100000, y1: 100000, x2: -100000, y2: -100000 };
-  const gardens = await gardensService.findCharged();
-  console.log("getGardensBounds", gardens);
-  for (let g of gardens) {
-    bbox.x1 = Math.min(bbox.x1, g.x);
-    bbox.y1 = Math.min(bbox.y1, g.y);
-    bbox.x2 = Math.max(bbox.x2, g.x);
-    bbox.y2 = Math.max(bbox.y2, g.y);
+  const g = await gardensService.findTheMostEdge();
+
+  if (!g) {
+    return bbox;
   }
+
+  bbox.x1 = Math.min(bbox.x1, Math.abs(g.x * 1000));
+  bbox.y1 = Math.min(bbox.y1, Math.abs(g.y * 1000));
+  bbox.x2 = Math.max(bbox.x2, Math.abs(g.x * 1000) * -1);
+  bbox.y2 = Math.max(bbox.y2, Math.abs(g.y * 1000) * -1);
 
   bbox.x2 += 1000;
   bbox.y2 += 1000;
@@ -103,7 +104,6 @@ const generateCreatureMovement = async (type, ownerGarden, fromPosition, telepor
   }
 
   const gardenBoundingBox = await getGardensBounds();
-  console.log("gardenBoundingBox", gardenBoundingBox);
   let teleportPosition = teleport
     ? teleport
     : {
@@ -112,7 +112,6 @@ const generateCreatureMovement = async (type, ownerGarden, fromPosition, telepor
       };
   let toPosition;
   let direction;
-  console.log("nextPosition", teleportPosition);
 
   switch (type) {
     case "moss":
@@ -180,13 +179,12 @@ exports.updateSingleCreatureForTap = async (user, newPosition) => {
   creature.animatedProperties.position = creatureAnimationParams;
   let updated = {};
   updated[creature.id] = { position: creatureAnimationParams };
-  const result = await creaturesService.update(creature.id, creature);
+  await creaturesService.update(creature.id, creature);
 
   return updated;
 };
 
 exports.updateCreatures = async (onlineUserUids, gardensForUid) => {
-  //console.log('online users: ', onlineUsers)
   const updated = {};
   if (onlineUserUids.length == 0) return updated;
 
