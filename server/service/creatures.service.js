@@ -116,5 +116,9 @@ exports.update = async function (id, data) {
     throw new Error(result.data.error);
   }
 
-  return convertWorkersToDwc(result.data.row);
+  if (result.data.rows) {
+    return convertWorkersToDwc(result.data.rows[0]);
+  }
+
+  return null;
 };

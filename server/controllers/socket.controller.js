@@ -54,8 +54,8 @@ exports.userConnected = async (socket) => {
     await creatureController.moveCreatureToGarden(creature, garden);
   } else {
     creature = await creatureController.createCreature(garden, user);
-    console.log(user)
-    console.log(creature)
+    console.log(user);
+    console.log(creature);
     await usersService.update(user.id, { ...user, creature_id: creature.id });
   }
 
@@ -87,10 +87,17 @@ const onCreatureEvolve = (socket) => async (creature) => {
 };
 
 onGardenTap = (socket) => async (data) => {
-  console.log(data)
+  console.log("=== onGardenTap ===");
+  console.log(data);
   const uid = socketIdToUserId[socket.id];
   const user = await getUserInfo(uid);
+  console.log(uid, user);
   let updates = await creatureController.updateSingleCreatureForTap(user, data);
+  console.log("=== updates ===");
+  console.log(updates);
+  Object.values(updates).forEach((u) => {
+    console.log(u.teleport);
+  });
   io.emit("creaturesUpdate", updates);
 };
 
@@ -142,6 +149,5 @@ exports.startAnimatingCreatures = async () => {
       let updated = await creatureController.updateCreatures(onlineUsers, gardenForUidCache);
       if (Object.keys(updated).length > 0) io.emit("creaturesUpdate", updated);
     }
-    
   }, 1000);
 };

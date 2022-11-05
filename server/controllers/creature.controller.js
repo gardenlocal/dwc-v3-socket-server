@@ -51,7 +51,7 @@ exports.bringCreatureOffline = async (user) => {
 };
 
 exports.moveCreatureToGarden = async (creature, garden) => {
-  console.log(garden)
+  console.log(garden);
   creature.animatedProperties = {
     position: await generateCreatureMovement(creature.appearance.creatureType, garden),
   };
@@ -71,8 +71,8 @@ exports.getAllCreaturesInfo = () => {
 // NOTE: deprecated on v3
 const getGardensBounds = async () => {
   const bbox = { x1: 100000, y1: 100000, x2: -100000, y2: -100000 };
-  const gardens = await gardensService.findCharged()
-  console.log("getGardensBounds", gardens)
+  const gardens = await gardensService.findCharged();
+  console.log("getGardensBounds", gardens);
   for (let g of gardens) {
     bbox.x1 = Math.min(bbox.x1, g.x);
     bbox.y1 = Math.min(bbox.y1, g.y);
@@ -100,7 +100,7 @@ const generateCreatureMovement = async (type, ownerGarden, fromPosition, telepor
   }
 
   const gardenBoundingBox = await getGardensBounds();
-  console.log("gardenBoundingBox",gardenBoundingBox);
+  console.log("gardenBoundingBox", gardenBoundingBox);
   let teleportPosition = teleport
     ? teleport
     : {
@@ -172,13 +172,13 @@ exports.updateSingleCreatureForTap = async (user, newPosition) => {
     creature.appearance.creatureType,
     garden,
     null,
-    {x: -1000, y:-1000}
+    newPosition
   );
   creature.animatedProperties.position = creatureAnimationParams;
-  console.log("tap", creature.animatedProperties);
   let updated = {};
   updated[creature.id] = { position: creatureAnimationParams };
-  await creaturesService.update(creature.id, creature);
+  const result = await creaturesService.update(creature.id, creature);
+
   return updated;
 };
 
