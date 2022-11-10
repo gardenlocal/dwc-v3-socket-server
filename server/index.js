@@ -6,13 +6,10 @@ const cors = require("cors");
 
 const socketController = require("./controllers/socket.controller");
 const database = require("./db");
-const initializeDB = require("./dbInit");
-
 const app = express();
 const httpServer = require("http").createServer(app);
-const { fetchWeather } = require("./weatherService");
 
-const WEATHER_API = "https://garden-local-dev.hoonyland.workers.dev/weather/latest";
+const WEATHER_API = process.env.WEATHER_API_HOST || "https://garden-local-dev.hoonyland.workers.dev/weather/latest";
 const io = require("socket.io")(httpServer, {
   cors: {
     origin: "*",
@@ -31,8 +28,6 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
-
-initializeDB();
 
 // simple route
 app.get("/", (req, res) => {
