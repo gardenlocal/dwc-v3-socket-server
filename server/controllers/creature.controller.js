@@ -41,8 +41,28 @@ exports.createCreature = async (garden, user) => {
   return creature;
 };
 
-exports.bringCreatureOnline = (creature) => {
-  return creaturesService.update(creature.id, { is_online: true });
+createNewCreatureForTest = () => {
+  const creatureTypes = getConfig().creatureTypes;
+  const creatureType = utils.randomElementFromArray(creatureTypes);
+  let creatureProps;
+  switch (creatureType) {
+    case "moss":
+      creatureProps = generateMoss();
+      break;
+    case "lichen":
+      creatureProps = generateLichen();
+      break;
+    case "mushroom":
+      creatureProps = generateMushroom();
+      break;
+  }
+  return creatureProps;
+}
+
+exports.bringCreatureOnline = async (creature) => {
+  let creatureProps = await createNewCreatureForTest();
+
+  return creaturesService.update(creature.id, { is_online: true, appearance: {...creatureProps} });
 };
 
 exports.bringCreatureOffline = async (user) => {
