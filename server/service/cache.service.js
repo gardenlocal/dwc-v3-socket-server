@@ -54,6 +54,7 @@ class Cache {
   }
 
   findAllCreatures() {
+    return null;
     if (this.creatures.length === 0) {
       return null;
     }
