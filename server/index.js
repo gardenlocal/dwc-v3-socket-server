@@ -18,7 +18,7 @@ const io = require("socket.io")(httpServer, {
 });
 
 var corsOptions = {
-  origin: ["*", "http://localhost:1234", WEATHER_API],
+  origin: ["*", "http://localhost:1234", "http://192.168.100.1", WEATHER_API],
   credential: true,
   allowedHeaders: ["Content-Type"],
 };

@@ -1,4 +1,3 @@
-const { getAllUsersInfo } = require("./db.controller");
 const usersService = require("../service/users.service");
 
 exports.allAccess = (req, res) => {

@@ -1,7 +1,31 @@
 class Cache {
+  usersToAssign = [];
+  handlersToAssign = new Map();
   creatures = [];
   usersByUid = new Map();
   theMostEdgeGarden = null;
+
+  checkMyTurnToAssign(user) {
+    const currentUser = this.usersToAssign[0];
+    if (currentUser) {
+      return currentUser.id === user.id;
+    }
+
+    return true;
+  }
+
+  getCurrentUserToAssign() {
+    return this.usersToAssign[0];
+  }
+
+  addUserToAssign(user, callback) {
+    this.usersToAssign.push(user);
+    this.handlersToAssign.set(user.id, callback);
+  }
+
+  popUserToAssign() {
+    this.usersToAssign.pop();
+  }
 
   getTheMostEdgeGarden() {
     return this.theMostEdgeGarden;
