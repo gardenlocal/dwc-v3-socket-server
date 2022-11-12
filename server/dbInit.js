@@ -51,7 +51,6 @@ const init = async () => {
     for (let y = yFrom; y <= yTo; y++) {
       const { tileProps, shaderProps } = generateProps();
       const garden = { x, y, index: Math.abs(x) + Math.abs(y), tileProps, shaderProps };
-      console.log(x, y);
       gardens.push(garden);
     }
   }

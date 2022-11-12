@@ -129,10 +129,11 @@ exports.update = async function (id, data) {
   }
 };
 
-exports.assignGarden = async function (id) {
+exports.assignGarden = async function (id, { x, y } = {}) {
   const result = await axios({
     method: "put",
     url: `${config.apiHost}/users/${id}/garden-sections`,
+    data: { x, y },
   });
 
   if (result.data.error) {

@@ -19,7 +19,8 @@ exports.initialize = (ioInstance) => {
 exports.userConnected = async (socket) => {
   const uid = socket.handshake.query.uid;
   const creatureName = socket.handshake.query.creatureName;
-  const newCreatureName = creatureName;
+  const gardenSectionX = socket.handshake.query.gardenSectionX;
+  const gardenSectionY = socket.handshake.query.gardenSectionY;
   socketIdToUserId[socket.id] = uid;
   socketMap[uid] = socket;
 
@@ -41,7 +42,10 @@ exports.userConnected = async (socket) => {
   await gardenController.clearGardenSection(user);
 
   // Create a new garden section for the current user
-  user = await usersService.assignGarden(user.id);
+  user = await usersService.assignGarden(user.id, {
+    x: gardenSectionX || null,
+    y: gardenSectionY || null,
+  });
   const garden = user.gardenSection;
 
   gardenForUidCache[uid] = garden;
