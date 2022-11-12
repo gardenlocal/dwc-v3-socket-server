@@ -44,7 +44,9 @@ class Cache {
   }
 
   setUserByUid(user) {
-    this.usersByUid.set(user.uid, user);
+    if (user) {
+      this.usersByUid.set(user.uid, user);
+    }
   }
 
   getUserByUid(uid) {
