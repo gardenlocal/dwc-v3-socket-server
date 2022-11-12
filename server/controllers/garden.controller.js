@@ -83,7 +83,7 @@ exports.clearGardenSection = async (user) => {
   const garden = await gardensService.findOne({ where: { user_id: user.id } });
   if (!garden) return;
 
-  await usersService.removeGarden(user.id);
+  await usersService.removeGarden(user.id, user.uid);
   await gardensService.update(garden.id, { ...garden, user_id: null });
 };
 

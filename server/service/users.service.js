@@ -1,6 +1,7 @@
 const axios = require("axios");
 const config = require("./config");
 const { convertWorkersToDwc } = require("./gardens.service");
+const cache = require("./cache.service");
 
 exports.create = async function (user) {
   const result = await axios({
@@ -18,6 +19,7 @@ exports.create = async function (user) {
     row.gardenSection = convertWorkersToDwc(row.gardenSection);
   }
 
+  cache.setUserByUid(row);
   return row;
 };
 
@@ -64,6 +66,11 @@ exports.findById = async function (id) {
 };
 
 exports.findByUid = async function (uid) {
+  const user = cache.getUserByUid(uid);
+  if (user) {
+    return user;
+  }
+
   const result = await axios({
     method: "get",
     url: `${config.apiHost}/users/by-uid/${uid}`,
@@ -78,6 +85,7 @@ exports.findByUid = async function (uid) {
     row.gardenSection = convertWorkersToDwc(row.gardenSection);
   }
 
+  cache.setUserByUid(row);
   return row;
 };
 
@@ -125,6 +133,7 @@ exports.update = async function (id, data) {
       row.gardenSection = convertWorkersToDwc(row.gardenSection);
     }
 
+    cache.setUserByUid(row);
     return row;
   }
 };
@@ -145,9 +154,11 @@ exports.assignGarden = async function (id, { x, y } = {}) {
     row.gardenSection = convertWorkersToDwc(row.gardenSection);
   }
 
+  cache.setUserByUid(row);
   return row;
 };
 
-exports.removeGarden = async function (id) {
+exports.removeGarden = async function (id, uid) {
+  cache.resetUserByUid(uid);
   return exports.update(id, { garden_section_id: null });
 };
