@@ -1,6 +1,19 @@
 class Cache {
   creatures = [];
   usersByUid = new Map();
+  theMostEdgeGarden = null;
+
+  getTheMostEdgeGarden() {
+    return this.theMostEdgeGarden;
+  }
+
+  setTheMostEdgeGarden(garden) {
+    this.theMostEdgeGarden = garden;
+  }
+
+  resetTheMostEdgeGarden() {
+    this.theMostEdgeGarden = null;
+  }
 
   resetUserByUid(uid) {
     this.usersByUid.delete(uid);

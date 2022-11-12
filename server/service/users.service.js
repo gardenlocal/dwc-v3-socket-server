@@ -139,6 +139,8 @@ exports.update = async function (id, data) {
 };
 
 exports.assignGarden = async function (id, { x, y } = {}) {
+  cache.resetTheMostEdgeGarden();
+
   const result = await axios({
     method: "put",
     url: `${config.apiHost}/users/${id}/garden-sections`,

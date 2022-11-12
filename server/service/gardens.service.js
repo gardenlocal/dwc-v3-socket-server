@@ -1,5 +1,6 @@
 const axios = require("axios");
 const config = require("./config");
+const cache = require("./cache.service");
 
 function convertDwcToWorkers(garden) {
   return {
@@ -63,7 +64,12 @@ exports.findCharged = async function (where) {
   return result.data.rows.map(convertWorkersToDwc);
 };
 
-exports.findTheMostEdge = async function (where) {
+exports.findTheMostEdge = async function () {
+  const cachedGarden = cache.getTheMostEdgeGarden();
+  if (cachedGarden) {
+    return cachedGarden;
+  }
+
   const result = await axios({
     method: "get",
     url: `${config.apiHost}/garden-sections/the-most-edge`,
@@ -73,7 +79,9 @@ exports.findTheMostEdge = async function (where) {
     throw new Error(result.data.error);
   }
 
-  return convertWorkersToDwc(result.data.row);
+  const garden = convertWorkersToDwc(result.data.row);
+  cache.setTheMostEdgeGarden(garden);
+  return garden;
 };
 
 exports.findById = async function (id) {
@@ -108,6 +116,8 @@ exports.findOne = async function ({ where }) {
 };
 
 exports.update = async function (id, data) {
+  cache.resetTheMostEdgeGarden();
+
   data.user = undefined;
   data.owner = undefined;
 
@@ -125,6 +135,8 @@ exports.update = async function (id, data) {
 };
 
 exports.updateWithoutConvert = async function (id, data) {
+  cache.resetTheMostEdgeGarden();
+
   data.user = undefined;
   data.owner = undefined;
 
