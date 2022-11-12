@@ -1,6 +1,8 @@
 const axios = require("axios");
 const config = require("./config");
 
+const cache = require("./cache.service");
+
 function convertDwcToWorkers(creature) {
   if (!creature) {
     return null;
@@ -26,6 +28,8 @@ function convertWorkersToDwc(creature) {
 }
 
 exports.save = async function (creature) {
+  cache.resetAllCreatures();
+
   const result = await axios({
     method: "post",
     url: `${config.apiHost}/creatures`,
@@ -40,6 +44,11 @@ exports.save = async function (creature) {
 };
 
 exports.find = async function (where) {
+  const cachedCreatures = cache.findAllCreatures();
+  if (cachedCreatures) {
+    return cachedCreatures;
+  }
+
   const result = await axios({
     method: "get",
     url: `${config.apiHost}/creatures/all`,
@@ -50,7 +59,9 @@ exports.find = async function (where) {
     throw new Error(result.data.error);
   }
 
-  return result.data.rows.map(convertWorkersToDwc);
+  const creatures = result.data.rows.map(convertWorkersToDwc);
+  cache.setAllCreatures(creatures);
+  return creatures;
 };
 
 exports.findOne = async function (where) {
@@ -103,6 +114,8 @@ exports.findById = async function (id) {
 };
 
 exports.update = async function (id, data) {
+  cache.resetAllCreatures();
+
   data.user = undefined;
   data.owner = undefined;
 
