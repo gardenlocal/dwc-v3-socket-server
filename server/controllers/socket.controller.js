@@ -32,6 +32,7 @@ exports.userConnected = async (socket) => {
   // Get or create user for the given uid
   console.log("Fetching user from DB: ", uid);
   let user = await usersService.findByUid(uid);
+  console.log("---> user has connected");
 
   if (!user) {
     user = await usersService.create({ uid, creatureName });
@@ -48,6 +49,7 @@ exports.userConnected = async (socket) => {
   });
   const garden = user.gardenSection;
 
+  console.log("garden has been assigned");
   gardenForUidCache[uid] = garden;
 
   // Create a new creature for the user if one doesn't exist,
@@ -61,14 +63,20 @@ exports.userConnected = async (socket) => {
     await usersService.update(user.id, { ...user, creature_id: creature.id });
   }
 
-  await creatureController.bringCreatureOnline(creature);
+  console.log("---> creature has been created");
 
-  io.emit("usersUpdate", await getOnlineUsers());
+  await creatureController.bringCreatureOnline(creature);
+  console.log("---> creature has become online");
+
+  const onlineUsers = await getOnlineUsers();
+  io.emit("usersUpdate", onlineUsers);
+  console.log("---> users have updated");
 
   const creatures = await getAllCreatures();
   const creaturesString = JSON.stringify(creatures, (key, val) => {
     return val && val.toFixed ? Number(val.toFixed(3)) : val;
   });
+
   io.emit("creatures", creaturesString);
 };
 
@@ -90,8 +98,10 @@ const onCreatureEvolve = (socket) => async (creature) => {
 
 onGardenTap = (socket) => async (data) => {
   const uid = socketIdToUserId[socket.id];
+
   const user = await getUserInfo(uid);
   let updates = await creatureController.updateSingleCreatureForTap(user, data);
+
   io.emit("creaturesUpdate", updates);
 };
 
