@@ -154,5 +154,5 @@ exports.startAnimatingCreatures = async () => {
       let updated = await creatureController.updateCreatures(onlineUsers, gardenForUidCache);
       if (Object.keys(updated).length > 0) io.emit("creaturesUpdate", updated);
     }
-  }, 10000);
+  }, 5 * 1000);
 };
