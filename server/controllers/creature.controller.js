@@ -9,10 +9,8 @@ const gardensService = require("../service/gardens.service");
 
 let allCreatures = {};
 
-exports.createCreature = async (garden, user) => {
-  //const creatureType = Math.random() < 0.7 ? Object.keys(DWC_META.creaturesNew)[0] : Object.keys(DWC_META.creaturesNew)[1]//utils.randomElementFromArray(Object.keys(DWC_META.creaturesNew))
-  const creatureTypes = getConfig().creatureTypes;
-  const creatureType = utils.randomElementFromArray(creatureTypes);
+exports.createCreature = async (garden, user, type) => {
+  const creatureType = type || utils.randomElementFromArray(getConfig().creatureTypes);
   let creatureProps;
   switch (creatureType) {
     case "moss":

@@ -21,6 +21,7 @@ exports.userConnected = async (socket) => {
   const creatureName = socket.handshake.query.creatureName;
   const gardenSectionX = socket.handshake.query.gardenSectionX;
   const gardenSectionY = socket.handshake.query.gardenSectionY;
+  const creatureType = socket.handshake.query.creatureType || "";
   socketIdToUserId[socket.id] = uid;
   socketMap[uid] = socket;
 
@@ -59,7 +60,7 @@ exports.userConnected = async (socket) => {
   if (creature) {
     await creatureController.moveCreatureToGarden(creature, garden);
   } else {
-    creature = await creatureController.createCreature(garden, user);
+    creature = await creatureController.createCreature(garden, user, creatureType);
     await usersService.update(user.id, { ...user, creature_id: creature.id });
   }
 
