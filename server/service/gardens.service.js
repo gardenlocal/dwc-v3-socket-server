@@ -1,6 +1,6 @@
-const axios = require("axios");
-const config = require("./config");
-const cache = require("./cache.service");
+const { client: supabase, NOT_FOUND_ERROR_CODE } = require("./supabase.service");
+
+const SELECT = "id, user_id, owner: user_id (*), user: user_id (*), x, y, index, props";
 
 function convertDwcToWorkers(garden) {
   return {
@@ -27,146 +27,123 @@ function convertWorkersToDwc(garden) {
 }
 
 exports.save = async function (garden) {
-  const result = await axios({
-    method: "post",
-    url: `${config.apiHost}/garden-sections`,
-    data: convertDwcToWorkers(garden),
-  });
+  const { data, error } = await supabase
+    .from("gardensections")
+    .insert(convertDwcToWorkers(garden))
+    .select(SELECT)
+    .single();
 
-  if (result.data.error) {
-    throw new Error(result.data.error);
+  if (error) {
+    console.error(error);
+    return null;
   }
 
-  return convertWorkersToDwc(result.data.row);
+  return convertWorkersToDwc(data);
 };
 
 exports.find = async function (where) {
-  const result = await axios({
-    method: "get",
-    url: `${config.apiHost}/garden-sections/all`,
-    params: where,
-  });
+  const query = await supabase.from("gardensections").select(SELECT);
 
-  if (result.data.error) {
-    throw new Error(result.data.error);
+  if (where) {
+    Object.keys(where).forEach((key) => {
+      query.eq(key, where[key]);
+    });
   }
 
-  return result.data.rows.map(convertWorkersToDwc);
-};
+  const { data, error } = await query;
 
-exports.findCharged = async function (where) {
-  const result = await axios({
-    method: "get",
-    url: `${config.apiHost}/garden-sections/charged`,
-    params: where,
-  });
-
-  if (result.data.error) {
-    throw new Error(result.data.error);
+  if (error) {
+    console.error(error);
+    return [];
   }
 
-  return result.data.rows.map(convertWorkersToDwc);
+  if (data) {
+    return data.map((row) => convertWorkersToDwc(row));
+  }
+
+  return [];
 };
 
 exports.findTheMostEdge = async function () {
-  const result = await axios({
-    method: "get",
-    url: `${config.apiHost}/garden-sections/the-most-edge`,
-  });
+  const { data, error } = await supabase.rpc("find_the_most_edge_garden");
 
-  if (result.data.error) {
-    throw new Error(result.data.error);
+  if (error) {
+    console.error(error);
+    return null;
   }
 
-  const garden = convertWorkersToDwc(result.data.row);
-  cache.setTheMostEdgeGarden(garden);
-  return garden;
+  const mostEdge = data && data[0];
+  if (mostEdge) {
+    return convertWorkersToDwc(mostEdge);
+  }
+
+  return null;
 };
 
 exports.findById = async function (id) {
-  const result = await axios({
-    method: "get",
-    url: `${config.apiHost}/garden-sections/${id}`,
-  });
+  const { data, error } = await supabase.from("gardensections").select(SELECT).eq("id", id).limit(1).single();
 
-  if (result.data.error) {
-    throw new Error(result.data.error);
+  if (error && error.code !== NOT_FOUND_ERROR_CODE) {
+    throw error;
   }
 
-  return convertWorkersToDwc(result.data.row);
+  return convertWorkersToDwc(data);
 };
 
 exports.findOne = async function ({ where }) {
-  const result = await axios({
-    method: "get",
-    url: `${config.apiHost}/garden-sections/all`,
-    params: where,
-  });
+  const query = supabase.from("gardensections").select(SELECT);
 
-  if (result.data.error) {
-    throw new Error(result.data.error);
+  if (where) {
+    Object.keys(where).forEach((key) => {
+      query.eq(key, where[key]);
+    });
   }
 
-  if (result.data && result.data.rows && result.data.rows.length) {
-    return convertWorkersToDwc(result.data.rows[0]);
+  const { data, error } = await query.limit(1).single();
+
+  if (error && error.code !== NOT_FOUND_ERROR_CODE) {
+    throw error;
   }
 
-  return null;
+  return convertWorkersToDwc(data);
 };
 
-exports.update = async function (id, data) {
-  cache.resetTheMostEdgeGarden();
+exports.update = async function (id, garden) {
+  garden.user = undefined;
+  garden.owner = undefined;
 
-  data.user = undefined;
-  data.owner = undefined;
+  const { data, error } = await supabase
+    .from("gardensections")
+    .update(convertDwcToWorkers(garden))
+    .eq("id", id)
+    .select();
 
-  const result = await axios({
-    method: "put",
-    url: `${config.apiHost}/garden-sections/${id}`,
-    data: convertDwcToWorkers(data),
-  });
-
-  if (result.data.error) {
-    throw new Error(result.data.error);
+  if (error && error.code !== NOT_FOUND_ERROR_CODE) {
+    console.error(error);
+    return null;
   }
 
-  return result.data.rows;
+  const updatedGarden = data && data[0];
+  return convertWorkersToDwc(updatedGarden);
 };
 
-exports.updateWithoutConvert = async function (id, data) {
-  cache.resetTheMostEdgeGarden();
+exports.updateWithoutConvert = async function (id, garden) {
+  garden.user = undefined;
+  garden.owner = undefined;
 
-  data.user = undefined;
-  data.owner = undefined;
+  const { data, error } = await supabase.from("gardensections").update(garden).eq("id", id).select();
 
-  const result = await axios({
-    method: "put",
-    url: `${config.apiHost}/garden-sections/${id}`,
-    data,
-  });
-
-  if (result.data.error) {
-    throw new Error(result.data.error);
+  if (error && error.code !== NOT_FOUND_ERROR_CODE) {
+    console.error(error);
+    return null;
   }
 
-  return result.data.rows;
+  const updatedGarden = data && data[0];
+  return convertWorkersToDwc(updatedGarden);
 };
 
-exports.remove = async function (id) {
-  const result = await axios({
-    method: "delete",
-    url: `${config.apiHost}/garden-sections/${id}`,
-  });
-
-  if (result.data.status !== 404 && result.data.error) {
-    throw new Error(result.data.error);
-  }
-
-  if (result.data && result.data.rows && result.data.rows.length) {
-    return convertWorkersToDwc(result.data.rows[0]);
-  }
-
-  return null;
+exports.remove = function (id) {
+  return supabase.from("gardensections").delete().eq("id", id);
 };
 
 exports.convertWorkersToDwc = convertWorkersToDwc;
