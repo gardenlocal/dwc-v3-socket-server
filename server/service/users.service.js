@@ -66,11 +66,6 @@ exports.findById = async function (id) {
 };
 
 exports.findByUid = async function (uid) {
-  const user = cache.getUserByUid(uid);
-  if (user) {
-    return user;
-  }
-
   const result = await axios({
     method: "get",
     url: `${config.apiHost}/users/by-uid/${uid}`,

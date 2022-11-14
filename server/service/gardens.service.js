@@ -15,6 +15,10 @@ function convertDwcToWorkers(garden) {
 }
 
 function convertWorkersToDwc(garden) {
+  if (!garden) {
+    return garden;
+  }
+
   return {
     ...garden,
     tileProps: garden.props.tiles,
@@ -65,11 +69,6 @@ exports.findCharged = async function (where) {
 };
 
 exports.findTheMostEdge = async function () {
-  const cachedGarden = cache.getTheMostEdgeGarden();
-  if (cachedGarden) {
-    return cachedGarden;
-  }
-
   const result = await axios({
     method: "get",
     url: `${config.apiHost}/garden-sections/the-most-edge`,
