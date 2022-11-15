@@ -28,7 +28,7 @@ const fullConfig = {
 };
 
 const getConfig = () => {
-  return fullConfig[process.env.GARDEN_TYPE] || fullConfig.moss;
+  return fullConfig[process.env.GARDEN_TYPE] || fullConfig.lichen;
 };
 
 exports.fullConfig = fullConfig;

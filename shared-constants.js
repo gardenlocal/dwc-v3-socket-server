@@ -256,7 +256,7 @@ exports.generateLichen = () => {
     const creatureType = "lichen"
     const totalEvolutions = 10
 
-    let noChildren = randomIntInRange(1, 4)
+    let noChildren = randomIntInRange(1, 20)
     let parentType = randomElementFromArray(Object.keys(DWC_META.creaturesNew[creatureType]))
     let element = {
         type: parentType,
@@ -264,55 +264,107 @@ exports.generateLichen = () => {
         parentConnector: null,
         visibleChildren: noChildren,        
     }
-    
-    let parentUsedConnectors = {}
-
+        
+    // lichen. 10 evolutions. connectorCount: 4
     for (let i = 0; i < totalEvolutions; i++) {        
-        let childType = randomElementFromArray(Object.keys(DWC_META.creaturesNew[creatureType][parentType].connectors))
-        let ch = {
-            type: childType,
-            children: [],
-        }
-
-        // Only keep track of the last "noChildren" used connectors
-        if (i >= noChildren) {
-            let connIndex = element.children[i - noChildren].parentConnector
-            delete parentUsedConnectors[connIndex]
-        }
-
-        const connectorCount = DWC_META.creaturesNew[creatureType][childType].connectors[childType]
-        ch.parentConnector = randomIntInRange(0, connectorCount)
-        while (parentUsedConnectors[ch.parentConnector]) {
-            ch.parentConnector = randomIntInRange(0, connectorCount)
-        }
-        parentUsedConnectors[ch.parentConnector] = true
-
-
-        let no2Children = randomIntInRange(0, 3)
-        let childUsedConnectors = {}
-
-        for (let j = 0; j < no2Children; j++) {
-            const child2Type = randomElementFromArray(Object.keys(DWC_META.creaturesNew[creatureType][childType].connectors))
-            let c = {
-                type: child2Type,
-                children: []
-            }            
-
-            const connector2Count = DWC_META.creaturesNew[creatureType][childType].connectors[child2Type]
-            c.type = child2Type
-            c.parentConnector = randomIntInRange(0, connector2Count)
-            while (childUsedConnectors[c.parentConnector]) {
-                c.parentConnector = randomIntInRange(0, connector2Count)
-            }
-            childUsedConnectors[c.parentConnector] = true
-
-            ch.children.push(c)            
-        }
-
-        element.children.push(ch)
+        
     }
 
-    const scale = randomInRange(1, 4)
+    // 2021 version. element JSON shape
+    /**
+     *  {
+            type: 'lichen-element-1',
+            children: [],
+            parentConnector: null,
+            visibleChildren: 2
+        }
+     */
+
+    // hardcode test
+    let lichenChildTemplate =  { type: 'lichen-element-1', children: [], parentConnector: 2 };    
+    let lichenChild2 = {
+        type: 'lichen-element-1',
+        children: [ { type: 'lichen-element-1', children: [], parentConnector: 2 } ],
+        parentConnector: 3
+    }
+    let lichenChild1 = {
+        type: 'lichen-element-1',
+        children: [ { type: 'lichen-element-1', children: [lichenChild2], parentConnector: 2 } ],
+        parentConnector: 3
+    }
+    let lichenElement = {
+        children: [lichenChild1],
+        parentConnector: null,
+        type: parentType,
+        visibleChildren: 10
+    }
+    let lichenJson = {
+        creatureType,
+        scale, 
+        rotation: 0,
+        fillColor,
+        evolutionIndex,
+        visibleChildren: noChildren,
+        element: lichenElement,
+    }
+
+    let lichenElementInit = {
+        children: [],
+        parentConnector: 0,
+        type: parentType,
+        visibleChildren: 200
+    }
+    // recursion test
+    let recursionNum = 20;    
+    const recursionLimit = 1; // 재귀 끝내기.
+    const connectorCount = 4; // child가 달라붙을 수 있는 모서리 갯수.
+
+    function createLichenChildTemplate (targetIndex) {
+        console.log("//////// make new lichen child at target Index: ", targetIndex)
+        return { type: 'lichen-element-1', children: [], parentConnector: targetIndex };
+    }
+
+    const lichenConnectors = [0, 1, 2, 3];
+    function recur(parent, deductBoolean) {
+        const parentOccupiedConnector = parent.parentConnector;
+        let avoidIndex = (parentOccupiedConnector+2)%4;
+        const possibleIndices = lichenConnectors.filter(i => i !== avoidIndex);
+        console.log("///// avoid this index: ", avoidIndex);
+        console.log("///// possible index array: ", possibleIndices);
+        let chosenIndices = [];
+        const rand = randomIntInRange(1, possibleIndices.length);
+        console.log("///// run random amount of loop: ", rand);
+        for(let i = 0; i < rand; i++ ){
+            chosenIndices.push(randomElementFromArray(possibleIndices));
+        }
+        console.log("///// chosenIndices: ", chosenIndices);
+
+        const children = chosenIndices.map(index => createLichenChildTemplate(index));
+        console.log("///// made children: ", children);
+        console.log("///// recursion parameter - parent: ", parent);
+        parent.children = children;    
+
+        if(deductBoolean == true) {
+            recursionNum -= 1;
+        }
+
+        if(recursionNum > recursionLimit) {
+            for(let i = 0; i< parent.children.length; i++) {
+                let nextParent = parent.children[i];
+                
+                let deductRecursion = false;
+                if(i == 0) deductRecursion = true;
+
+                recur(nextParent, deductRecursion);
+            }
+        }
+    }
+
+    recur(lichenElementInit); 
+    console.log("///////// final return of generateLichen /////////");
+    console.log(JSON.stringify(lichenElementInit));
+
+    const scale = randomInRange(1.5, 3)
     const rotation = randomInRange(-Math.PI / 2, Math.PI / 2)
     const fillColor = (Math.random() < 0.5) ? 0x0cef42 : 0xfd880b
     const evolutionIndex = noChildren
@@ -323,9 +375,9 @@ exports.generateLichen = () => {
         rotation,
         fillColor,
         evolutionIndex,
-        visibleChildren: noChildren,
-        element
-    }
+        visibleChildren: 200,
+        element: lichenElementInit
+    };
 }
 
 function randomInRange(a, b) {
@@ -338,4 +390,11 @@ function randomIntInRange(a, b) {
 
 function randomElementFromArray(arr) {
     return arr[randomIntInRange(0, arr.length)]
+}
+
+let lichen01 = {
+    children: [],
+    parentConnector: null,
+    type: "lichen-element-1",
+    visibleChildren: 2
 }
