@@ -10,7 +10,13 @@ const app = express();
 const httpServer = require("http").createServer(app);
 
 const WEATHER_API = process.env.WEATHER_API_HOST || "https://garden-local-dev.hoonyland.workers.dev/weather/latest";
-const io = require("socket.io")(httpServer, {
+
+const { Server } = require("socket.io");
+
+const io = new Server({
+  pingTimeout: 60 * 1000,
+  pingInterval: 100 * 1000,
+})(httpServer, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
