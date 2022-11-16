@@ -216,7 +216,7 @@ exports.generateMushroom = () => {
         })
     }
 
-    const scale = randomInRange(1, 4)
+    const scale = randomInRange(1, 3.5)
     const rotation = randomInRange(-Math.PI / 2, Math.PI / 2)
     const fillColor = (Math.random() < 0.5) ? 0x0cef42 : 0xfd880b
     const evolutionIndex = 0
@@ -317,7 +317,7 @@ exports.generateLichen = () => {
         visibleChildren: 50
     }
     // recursion test
-    let recursionNum = 20;    
+    let recursionNum = 10;    
     const recursionLimit = 1; // 재귀 끝내기.
     const connectorCount = 4; // child가 달라붙을 수 있는 모서리 갯수.
 
