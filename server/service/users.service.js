@@ -136,6 +136,9 @@ exports.assignGarden = async function (id, { x, y } = {}) {
         garden_section_id: null,
       });
     }
+
+    _garden.user_id = id;
+    await gardenSectionsService.update(_garden.id, _garden);
   } else {
     const { data, error } = await supabase.rpc("find_highest_priority_garden_v2", { userid: id });
     if (error) {

@@ -72,8 +72,6 @@ exports.findTheMostEdge = async function () {
     return null;
   }
 
-  console.log("---> the most edge");
-  console.log(data);
   const mostEdge = data && data[0];
   if (mostEdge) {
     return convertWorkersToDwc(mostEdge);
@@ -114,6 +112,8 @@ exports.update = async function (id, garden) {
   garden.user = undefined;
   garden.owner = undefined;
 
+  console.log("garden updated");
+  console.log(id, garden);
   const { data, error } = await supabase
     .from("gardensections")
     .update(convertDwcToWorkers(garden))
