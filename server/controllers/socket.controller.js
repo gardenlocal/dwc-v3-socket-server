@@ -108,6 +108,7 @@ onGardenTap = (socket) => async (data) => {
 
 const onDisconnect = (socket) => async (reason) => {
   console.log("on disconnect: ", socket.id);
+  console.log(reason);
   const uid = socketIdToUserId[socket.id];
 
   delete socketIdToUserId[socket.id];
