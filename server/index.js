@@ -13,10 +13,9 @@ const WEATHER_API = process.env.WEATHER_API_HOST || "https://garden-local-dev.ho
 
 const { Server } = require("socket.io");
 
-const io = new Server({
+const io = new Server(httpServer, {
   pingTimeout: 60 * 1000,
   pingInterval: 100 * 1000,
-})(httpServer, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
