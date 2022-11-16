@@ -150,13 +150,9 @@ exports.assignGarden = async function (id, { x, y } = {}) {
     garden_section_id: _garden.id,
   });
 
-  console.log(user);
-
   if (user && user.gardenSection) {
     user.gardenSection = convertWorkersToDwc(user.gardenSection);
   }
-
-  console.log(user.gardenSection);
 
   return user;
 };
