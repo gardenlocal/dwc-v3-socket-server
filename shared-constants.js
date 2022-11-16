@@ -322,7 +322,7 @@ exports.generateLichen = () => {
     const connectorCount = 4; // child가 달라붙을 수 있는 모서리 갯수.
 
     function createLichenChildTemplate (targetIndex) {
-        console.log("//////// make new lichen child at target Index: ", targetIndex)
+        // console.log("//////// make new lichen child at target Index: ", targetIndex)
         return { type: 'lichen-element-1', children: [], parentConnector: targetIndex };
     }
 
@@ -364,7 +364,7 @@ exports.generateLichen = () => {
 
     recur(lichenElementInit); 
     // console.log("///////// final return of generateLichen /////////");
-    console.log(JSON.stringify(lichenElementInit));
+    // console.log(JSON.stringify(lichenElementInit));
 
     const scale = randomInRange(1.5, 3)
     const rotation = randomInRange(-Math.PI / 2, Math.PI / 2)
