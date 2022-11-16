@@ -112,8 +112,6 @@ exports.update = async function (id, garden) {
   garden.user = undefined;
   garden.owner = undefined;
 
-  console.log("garden updated");
-  console.log(id, garden);
   const { data, error } = await supabase
     .from("gardensections")
     .update(convertDwcToWorkers(garden))

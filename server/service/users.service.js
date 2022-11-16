@@ -121,7 +121,7 @@ exports.update = async function (id, user) {
 };
 
 exports.assignGarden = async function (id, { x, y } = {}) {
-  if (x && y) {
+  if (`${x}` && `${y}`) {
     const row = await gardenSectionsService.findOne({ where: { x, y } });
 
     if (!row) {
@@ -138,6 +138,7 @@ exports.assignGarden = async function (id, { x, y } = {}) {
     }
 
     _garden.user_id = id;
+
     await gardenSectionsService.update(_garden.id, _garden);
   } else {
     const { data, error } = await supabase.rpc("find_highest_priority_garden_v2", { userid: id });
