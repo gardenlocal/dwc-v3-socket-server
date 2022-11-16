@@ -72,6 +72,8 @@ exports.findTheMostEdge = async function () {
     return null;
   }
 
+  console.log("---> the most edge");
+  console.log(data);
   const mostEdge = data && data[0];
   if (mostEdge) {
     return convertWorkersToDwc(mostEdge);
