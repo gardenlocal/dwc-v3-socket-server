@@ -1,7 +1,7 @@
-const axios = require("axios");
-const config = require("./config");
+const { client: supabase, NOT_FOUND_ERROR_CODE } = require("./supabase.service");
 
-const cache = require("./cache.service");
+const SELECT =
+  "id, owner: user_id (*), user: user_id (id, uid, creatureName), is_online, appearance, animated_properties";
 
 function convertDwcToWorkers(creature) {
   if (!creature) {
@@ -28,110 +28,86 @@ function convertWorkersToDwc(creature) {
 }
 
 exports.save = async function (creature) {
-  cache.resetAllCreatures();
+  const { data, error } = await supabase
+    .from("creatures")
+    .insert(convertDwcToWorkers(creature))
+    .select(SELECT)
+    .single();
 
-  const result = await axios({
-    method: "post",
-    url: `${config.apiHost}/creatures`,
-    data: convertDwcToWorkers(creature),
-  });
-
-  if (result.data.error) {
-    throw new Error(result.data.error);
+  if (error) {
+    console.error(error);
+    return null;
   }
 
-  return convertWorkersToDwc(result.data.row);
+  return convertWorkersToDwc(data);
 };
 
 exports.find = async function (where) {
-  const cachedCreatures = cache.findAllCreatures();
-  if (cachedCreatures) {
-    return cachedCreatures;
+  const query = supabase.from("creatures").select(SELECT);
+
+  if (where) {
+    Object.keys(where).forEach((key) => {
+      query.eq(key, where[key]);
+    });
   }
 
-  const result = await axios({
-    method: "get",
-    url: `${config.apiHost}/creatures/all`,
-    params: where,
-  });
+  const { data, error } = await query;
 
-  if (result.data.error) {
-    throw new Error(result.data.error);
+  if (error && error.code !== NOT_FOUND_ERROR_CODE) {
+    console.error(error);
+    return [];
   }
 
-  const creatures = result.data.rows.map(convertWorkersToDwc);
-  cache.setAllCreatures(creatures);
-  return creatures;
+  if (data) {
+    return data.map((row) => convertWorkersToDwc(row));
+  }
+
+  return [];
 };
 
 exports.findOne = async function (where) {
-  const result = await axios({
-    method: "get",
-    url: `${config.apiHost}/creatures/all`,
-    params: where,
-  });
+  const query = supabase.from("creatures").select(SELECT);
 
-  if (result.data.error) {
-    throw new Error(result.data.error);
+  if (where) {
+    Object.keys(where).forEach((key) => {
+      query.eq(key, where[key]);
+    });
   }
 
-  if (result.data && result.data.rows && result.data.rows.length) {
-    return convertWorkersToDwc(result.data.rows[0]);
+  const { data, error } = await query.limit(1).single();
+
+  if (error && error.code !== NOT_FOUND_ERROR_CODE) {
+    throw error;
   }
 
-  return null;
-};
-
-exports.findOneByUid = async function (where) {
-  const result = await axios({
-    method: "get",
-    url: `${config.apiHost}/creatures/all`,
-    params: where,
-  });
-
-  if (result.data.error) {
-    throw new Error(result.data.error);
-  }
-
-  if (result.data && result.data.rows && result.data.rows.length) {
-    return convertWorkersToDwc(result.data.rows[0]);
-  }
-
-  return null;
+  return convertWorkersToDwc(data);
 };
 
 exports.findById = async function (id) {
-  const result = await axios({
-    method: "get",
-    url: `${config.apiHost}/creatures/${id}`,
-  });
+  const { data, error } = await supabase.from("creatures").select(SELECT).eq("id", id).limit(1).single();
 
-  if (result.data.error) {
-    throw new Error(result.data.error);
+  if (error && error.code !== NOT_FOUND_ERROR_CODE) {
+    throw error;
   }
 
-  return convertWorkersToDwc(result.data.row);
+  return convertWorkersToDwc(data);
 };
 
-exports.update = async function (id, data) {
-  cache.resetAllCreatures();
+exports.update = async function (id, creature) {
+  creature.user = undefined;
+  creature.owner = undefined;
 
-  data.user = undefined;
-  data.owner = undefined;
+  const { data, error } = await supabase
+    .from("creatures")
+    .update(convertDwcToWorkers(creature))
+    .eq("id", id)
+    .select(SELECT);
 
-  const result = await axios({
-    method: "put",
-    url: `${config.apiHost}/creatures/${id}`,
-    data: data ? convertDwcToWorkers(data) : data,
-  });
-
-  if (result.data.error) {
-    throw new Error(result.data.error);
+  if (error && error.code !== NOT_FOUND_ERROR_CODE) {
+    console.error(error);
+    return null;
   }
 
-  if (result.data.rows) {
-    return convertWorkersToDwc(result.data.rows[0]);
-  }
-
-  return null;
+  const updatedCreature = data && data[0];
+  return convertWorkersToDwc(updatedCreature);
 };

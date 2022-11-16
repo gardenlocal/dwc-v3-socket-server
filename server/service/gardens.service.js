@@ -116,7 +116,7 @@ exports.update = async function (id, garden) {
     .from("gardensections")
     .update(convertDwcToWorkers(garden))
     .eq("id", id)
-    .select();
+    .select(SELECT);
 
   if (error && error.code !== NOT_FOUND_ERROR_CODE) {
     console.error(error);
@@ -131,7 +131,7 @@ exports.updateWithoutConvert = async function (id, garden) {
   garden.user = undefined;
   garden.owner = undefined;
 
-  const { data, error } = await supabase.from("gardensections").update(garden).eq("id", id).select();
+  const { data, error } = await supabase.from("gardensections").update(garden).eq("id", id).select(SELECT);
 
   if (error && error.code !== NOT_FOUND_ERROR_CODE) {
     console.error(error);
