@@ -281,6 +281,7 @@ exports.generateLichen = () => {
      */
 
     // hardcode test
+		/*
     let lichenChildTemplate =  { type: 'lichen-element-1', children: [], parentConnector: 2 };    
     let lichenChild2 = {
         type: 'lichen-element-1',
@@ -307,6 +308,7 @@ exports.generateLichen = () => {
         visibleChildren: noChildren,
         element: lichenElement,
     }
+		*/
 
     let lichenElementInit = {
         children: [],
