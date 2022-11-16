@@ -15,7 +15,6 @@ const { Server } = require("socket.io");
 
 const io = new Server(httpServer, {
   pingTimeout: 10 * 60 * 1000,
-  pingInterval: 100 * 1000,
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
