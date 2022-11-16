@@ -312,7 +312,7 @@ exports.generateLichen = () => {
         children: [],
         parentConnector: 0,
         type: parentType,
-        visibleChildren: 200
+        visibleChildren: 50
     }
     // recursion test
     let recursionNum = 20;    
@@ -329,19 +329,19 @@ exports.generateLichen = () => {
         const parentOccupiedConnector = parent.parentConnector;
         let avoidIndex = (parentOccupiedConnector+2)%4;
         const possibleIndices = lichenConnectors.filter(i => i !== avoidIndex);
-        console.log("///// avoid this index: ", avoidIndex);
-        console.log("///// possible index array: ", possibleIndices);
+        // console.log("///// avoid this index: ", avoidIndex);
+        // console.log("///// possible index array: ", possibleIndices);
         let chosenIndices = [];
         const rand = randomIntInRange(1, possibleIndices.length);
-        console.log("///// run random amount of loop: ", rand);
+        // console.log("///// run random amount of loop: ", rand);
         for(let i = 0; i < rand; i++ ){
             chosenIndices.push(randomElementFromArray(possibleIndices));
         }
-        console.log("///// chosenIndices: ", chosenIndices);
+        // console.log("///// chosenIndices: ", chosenIndices);
 
         const children = chosenIndices.map(index => createLichenChildTemplate(index));
-        console.log("///// made children: ", children);
-        console.log("///// recursion parameter - parent: ", parent);
+        // console.log("///// made children: ", children);
+        // console.log("///// recursion parameter - parent: ", parent);
         parent.children = children;    
 
         if(deductBoolean == true) {
@@ -361,7 +361,7 @@ exports.generateLichen = () => {
     }
 
     recur(lichenElementInit); 
-    console.log("///////// final return of generateLichen /////////");
+    // console.log("///////// final return of generateLichen /////////");
     console.log(JSON.stringify(lichenElementInit));
 
     const scale = randomInRange(1.5, 3)
@@ -375,7 +375,7 @@ exports.generateLichen = () => {
         rotation,
         fillColor,
         evolutionIndex,
-        visibleChildren: 200,
+        visibleChildren: 50,
         element: lichenElementInit
     };
 }
