@@ -45,8 +45,8 @@ exports.userConnected = async (socket) => {
 
   // Create a new garden section for the current user
   user = await usersService.assignGarden(user.id, {
-    x: gardenSectionX || null,
-    y: gardenSectionY || null,
+    x: isNaN(gardenSectionX) ? null : gardenSectionX,
+    y: isNaN(gardenSectionY) ? null : gardenSectionY,
   });
   const garden = user.gardenSection;
 
