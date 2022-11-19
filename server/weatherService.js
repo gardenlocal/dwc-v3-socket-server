@@ -3,12 +3,38 @@ require("dotenv").config();
 const axios = require("axios");
 const { getConfig } = require("./config.js");
 const Datastore = require("nedb-promises");
+const { create } = require("nedb-promises");
 const weatherDatabase = Datastore.create("storage/weather.db");
 
 console.log("Successfully connected to weather database");
 console.log("Config is: ", getConfig());
 
 const WEATHER_API = "https://garden-local-dev.hoonyland.workers.dev/weather/latest";
+
+// update 2022
+const createWeatherData = async (data) => {
+  console.log(data);
+  return data;
+  // try {
+  //   const { data, error } = await supabase.from("weather").insert(data).select().single();
+
+  //   if (error) {
+  //     console.error(error);
+  //     return null;
+  //   }
+
+  //   return convertWorkersToDwc(data);
+  // } catch (error) {
+  //   console.log("server Weather ERROR ------------ ", error);
+  //   return new Promise((res, rej) => res());
+  // } finally {
+  //   if (weather && weather.data) {
+  //     const weatherData = weather.data;
+  //     const { data } = weather;
+  //     return data;
+  //   }
+  // }
+};
 
 // update 2022
 const serverFetchWeatherData = async () => {
@@ -26,6 +52,8 @@ const serverFetchWeatherData = async () => {
     }
   }
 };
+
+exports.create = createWeatherData;
 exports.fetchWeather = serverFetchWeatherData;
 
 const fetchAndSaveWeatherData = async () => {

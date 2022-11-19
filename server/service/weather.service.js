@@ -1,11 +1,19 @@
-const axios = require("axios");
+const { client: supabase } = require("./supabase.service");
 
-exports.fetchWeather = async () => {
-  const WEATHER_API_HOST = process.env.WEATHER_API || "http://localhost:3000";
-  try {
-    const weather = await axios.get(WEATHER_API_HOST);
-    return weather.data;
-  } catch (error) {
+exports.create = async (weather) => {
+  const { data, error } = await supabase.from("weather").insert(weather).select().single();
+
+  if (error) {
     throw error;
   }
+
+  return data;
+};
+
+exports.fetchWeather = async () => {
+  const { data, error } = await supabase.from("weather").select().order("timestamp", { ascending: false }).single();
+  if (error) {
+    throw error;
+  }
+  return data;
 };

@@ -7,4 +7,5 @@ module.exports = function (app) {
   });
 
   app.get("/api/weather/latest", controller.fetchLatest);
+  app.post("/api/weather/latest", controller.create);
 };
