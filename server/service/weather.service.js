@@ -11,7 +11,7 @@ exports.create = async (weather) => {
 };
 
 exports.fetchWeather = async () => {
-  const { data, error } = await supabase.from("weather").select().order("timestamp", { ascending: false }).single();
+  const { data, error } = await supabase.from("weather").select().order("timestamp", { ascending: false }).limit(1).single();
   if (error) {
     throw error;
   }
