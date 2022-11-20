@@ -121,14 +121,14 @@ exports.update = async function (id, user) {
 };
 
 exports.assignGarden = async function (id, { x, y } = {}) {
+  let _garden = null;
   if (`${x}` && `${y}`) {
-    const row = await gardenSectionsService.findOne({ where: { x, y } });
+    _garden = await gardenSectionsService.findOne({ where: { x, y } });
 
-    if (!row) {
+    if (!_garden) {
       throw createHttpError(httpStatus.BAD_REQUEST, "해당 위치의 가든이 존재하지 않습니다.");
     }
 
-    _garden = row;
     const _user = await exports.findOne({ garden_section_id: _garden.id });
     if (_user && _user.id) {
       await exports.update(user.id, {
@@ -139,7 +139,7 @@ exports.assignGarden = async function (id, { x, y } = {}) {
 
     _garden.user_id = id;
 
-    await gardenSectionsService.update(_garden.id, _garden);
+    const result = await gardenSectionsService.update(_garden.id, _garden);
   } else {
     const { data, error } = await supabase.rpc("find_highest_priority_garden_v2", { userid: id });
     if (error) {
